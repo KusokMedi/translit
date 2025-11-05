@@ -64,7 +64,7 @@ git clone [https://github.com/yourusername/translit.git](https://github.com/Kuso
 
 ## 🌐 Демо
 
-[Ссылка на демо](kusokmedi.github.io/translit)
+[Ссылка на демо](https://kusokmedi.github.io/translit)
 
 ## 📝 Лицензия
 

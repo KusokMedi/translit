@@ -62,10 +62,21 @@
             background: #e8f5e9;
             border-radius: 5px;
             font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        body.dark .status {
+            background: #1b3a1f;
+            color: #a5d6a7;
         }
 
         .status.disabled {
             background: #fff3e0;
+        }
+
+        body.dark .status.disabled {
+            background: #3d2a1a;
+            color: #ffcc80;
         }
 
         .indicator {
@@ -117,7 +128,7 @@
             cursor: pointer;
             background: #4caf50;
             color: white;
-            transition: background 0.3s;
+            transition: all 0.3s;
         }
 
         button:hover {
@@ -132,10 +143,31 @@
             background: #888;
         }
 
+        body.dark button {
+            background: #388e3c;
+        }
+
+        body.dark button:hover {
+            background: #2e7d32;
+        }
+
+        body.dark .btn-clear {
+            background: #555;
+        }
+
+        body.dark .btn-clear:hover {
+            background: #666;
+        }
+
         .info {
             font-size: 13px;
             color: #666;
             line-height: 1.6;
+            transition: color 0.3s;
+        }
+
+        body.dark .info {
+            color: #aaa;
         }
 
         .hint {
@@ -145,6 +177,59 @@
             border-left: 3px solid #4caf50;
             font-size: 12px;
             color: #555;
+            transition: all 0.3s;
+        }
+
+        body.dark .hint {
+            background: #333;
+            border-left-color: #388e3c;
+            color: #aaa;
+        }
+
+        .mappings {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            font-size: 13px;
+            line-height: 1.8;
+            transition: all 0.3s;
+        }
+
+        body.dark .mappings {
+            background: #333;
+            color: #ccc;
+        }
+
+        .mappings h3 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            color: #333;
+        }
+
+        body.dark .mappings h3 {
+            color: #e0e0e0;
+        }
+
+        .mapping-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .mapping-item {
+            display: inline-block;
+            padding: 2px 6px;
+            background: white;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        body.dark .mapping-item {
+            background: #444;
         }
     </style>
 </head>
@@ -168,6 +253,50 @@
         <div class="hint">
             💡 Нажмите <strong>Esc</strong> чтобы переключить транслит
         </div>
+
+        <div class="mappings">
+            <h3>📋 Соответствие букв:</h3>
+            <div class="mapping-row">
+                <span class="mapping-item">a→а</span>
+                <span class="mapping-item">b→б</span>
+                <span class="mapping-item">c→ц</span>
+                <span class="mapping-item">d→д</span>
+                <span class="mapping-item">e→е</span>
+                <span class="mapping-item">f→ф</span>
+                <span class="mapping-item">g→г</span>
+                <span class="mapping-item">h→х</span>
+                <span class="mapping-item">i→и</span>
+                <span class="mapping-item">j→й</span>
+                <span class="mapping-item">k→к</span>
+                <span class="mapping-item">l→л</span>
+                <span class="mapping-item">m→м</span>
+                <span class="mapping-item">n→н</span>
+                <span class="mapping-item">o→о</span>
+                <span class="mapping-item">p→п</span>
+                <span class="mapping-item">r→р</span>
+                <span class="mapping-item">s→с</span>
+                <span class="mapping-item">t→т</span>
+                <span class="mapping-item">u→у</span>
+                <span class="mapping-item">v→в</span>
+                <span class="mapping-item">w→в</span>
+                <span class="mapping-item">x→кс</span>
+                <span class="mapping-item">y→й</span>
+                <span class="mapping-item">z→з</span>
+            </div>
+            <h3>🔤 Комбинации:</h3>
+            <div class="mapping-row">
+                <span class="mapping-item">ya→я</span>
+                <span class="mapping-item">yo→ё</span>
+                <span class="mapping-item">yu→ю</span>
+                <span class="mapping-item">ye→е</span>
+                <span class="mapping-item">yi→ы</span>
+                <span class="mapping-item">zh→ж</span>
+                <span class="mapping-item">ch→ч</span>
+                <span class="mapping-item">sh→ш</span>
+                <span class="mapping-item">shh→щ</span>
+                <span class="mapping-item">je→э</span>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -176,19 +305,21 @@
             'g': 'г', 'h': 'х', 'i': 'и', 'j': 'й', 'k': 'к', 'l': 'л',
             'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'q': 'к', 'r': 'р',
             's': 'с', 't': 'т', 'u': 'у', 'v': 'в', 'w': 'в', 'x': 'кс',
-            'y': 'ы', 'z': 'з',
+            'y': 'й', 'z': 'з',
             'A': 'А', 'B': 'Б', 'C': 'Ц', 'D': 'Д', 'E': 'Е', 'F': 'Ф',
             'G': 'Г', 'H': 'Х', 'I': 'И', 'J': 'Й', 'K': 'К', 'L': 'Л',
             'M': 'М', 'N': 'Н', 'O': 'О', 'P': 'П', 'Q': 'К', 'R': 'Р',
             'S': 'С', 'T': 'Т', 'U': 'У', 'V': 'В', 'W': 'В', 'X': 'Кс',
-            'Y': 'Ы', 'Z': 'З'
+            'Y': 'Й', 'Z': 'З'
         };
 
         const specialCombos = {
-            'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'yo': 'ё', 'yu': 'ю', 'ya': 'я',
-            'je': 'э', 'iy': 'ый', 'yj': 'ый',
-            'Zh': 'Ж', 'Ch': 'Ч', 'Sh': 'Ш', 'Yo': 'Ё', 'Yu': 'Ю', 'Ya': 'Я',
-            'ZH': 'Ж', 'CH': 'Ч', 'SH': 'Ш', 'YO': 'Ё', 'YU': 'Ю', 'YA': 'Я'
+            'ya': 'я', 'yo': 'ё', 'yu': 'ю', 'ye': 'е', 'yi': 'ы', 'je': 'э',
+            'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'shh': 'щ',
+            'Ya': 'Я', 'Yo': 'Ё', 'Yu': 'Ю', 'Ye': 'Е', 'Yi': 'Ы', 'Je': 'Э',
+            'Zh': 'Ж', 'Ch': 'Ч', 'Sh': 'Ш', 'Shh': 'Щ',
+            'YA': 'Я', 'YO': 'Ё', 'YU': 'Ю', 'YE': 'Е', 'YI': 'Ы', 'JE': 'Э',
+            'ZH': 'Ж', 'CH': 'Ч', 'SH': 'Ш', 'SHH': 'Щ'
         };
 
         let translitEnabled = true;
@@ -197,42 +328,73 @@
         const statusText = document.getElementById('statusText');
         const toggleBtn = document.getElementById('toggleBtn');
 
+        let latinBuffer = '';
+        let lastAddedLength = 0; // Сколько символов добавили в прошлый раз
+
         textArea.addEventListener('input', function(e) {
-            if (!translitEnabled) return;
+            if (!translitEnabled) {
+                latinBuffer = '';
+                lastAddedLength = 0;
+                return;
+            }
 
             const cursorPos = this.selectionStart;
-            const text = this.value;
-            const beforeCursor = text.substring(0, cursorPos);
-            const afterCursor = text.substring(cursorPos);
+            const currentValue = this.value;
             
-            let converted = '';
-            let i = 0;
-            
-            while (i < beforeCursor.length) {
-                let found = false;
+            if (e.inputType === 'insertText' && e.data) {
+                const char = e.data;
                 
-                for (let len = 2; len >= 1; len--) {
-                    const substr = beforeCursor.substr(i, len);
-                    if (specialCombos[substr]) {
-                        converted += specialCombos[substr];
-                        i += len;
-                        found = true;
-                        break;
+                // Добавляем символ в латинский буфер
+                latinBuffer += char;
+                
+                let replacedChars = lastAddedLength; // Сколько символов нужно удалить
+                let result = '';
+                
+                // Проверяем последние 3 символа
+                if (latinBuffer.length >= 3) {
+                    const last3 = latinBuffer.slice(-3);
+                    if (specialCombos[last3]) {
+                        result = specialCombos[last3];
+                        replacedChars = lastAddedLength + 1; // Удаляем все что было + новый символ
+                        latinBuffer = latinBuffer.slice(0, -3) + last3; // Оставляем комбинацию в буфере
+                        lastAddedLength = result.length;
+                        const newValue = currentValue.slice(0, -replacedChars) + result;
+                        this.value = newValue;
+                        this.setSelectionRange(newValue.length, newValue.length);
+                        return;
                     }
                 }
                 
-                if (!found) {
-                    converted += latToCyr[beforeCursor[i]] || beforeCursor[i];
-                    i++;
+                // Проверяем последние 2 символа
+                if (latinBuffer.length >= 2) {
+                    const last2 = latinBuffer.slice(-2);
+                    if (specialCombos[last2]) {
+                        result = specialCombos[last2];
+                        replacedChars = lastAddedLength + 1;
+                        latinBuffer = latinBuffer.slice(0, -2) + last2;
+                        lastAddedLength = result.length;
+                        const newValue = currentValue.slice(0, -replacedChars) + result;
+                        this.value = newValue;
+                        this.setSelectionRange(newValue.length, newValue.length);
+                        return;
+                    }
                 }
-            }
-
-            const newValue = converted + afterCursor;
-            
-            if (newValue !== text) {
+                
+                // Обычная конвертация одного символа
+                result = latToCyr[char] || char;
+                lastAddedLength = result.length;
+                const newValue = currentValue.slice(0, -1) + result;
                 this.value = newValue;
-                const newCursorPos = converted.length;
-                this.setSelectionRange(newCursorPos, newCursorPos);
+                this.setSelectionRange(newValue.length, newValue.length);
+                
+            } else if (e.inputType === 'deleteContentBackward') {
+                if (latinBuffer.length > 0) {
+                    latinBuffer = latinBuffer.slice(0, -1);
+                }
+                lastAddedLength = 0;
+            } else {
+                latinBuffer = '';
+                lastAddedLength = 0;
             }
         });
 
@@ -251,6 +413,7 @@
                 statusText.textContent = 'Транслит включен';
                 toggleBtn.textContent = 'Выключить (Esc)';
                 textArea.placeholder = 'Печатайте латиницей...';
+                latinBuffer = textArea.value; // Сохраняем текущий текст как латинский
             } else {
                 status.classList.add('disabled');
                 statusText.textContent = 'Транслит выключен';
@@ -263,6 +426,7 @@
 
         function clearText() {
             textArea.value = '';
+            latinBuffer = '';
             textArea.focus();
         }
 

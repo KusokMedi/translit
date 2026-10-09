@@ -286,8 +286,11 @@
             <h3>🔤 Комбинации:</h3>
             <div class="mapping-row">
                 <span class="mapping-item">ya→я</span>
+                <span class="mapping-item">ja→я</span>
                 <span class="mapping-item">yo→ё</span>
+                <span class="mapping-item">jo→ё</span>
                 <span class="mapping-item">yu→ю</span>
+                <span class="mapping-item">ju→ю</span>
                 <span class="mapping-item">ye→е</span>
                 <span class="mapping-item">yi→ы</span>
                 <span class="mapping-item">zh→ж</span>
@@ -314,11 +317,23 @@
         };
 
         const specialCombos = {
-            'ya': 'я', 'yo': 'ё', 'yu': 'ю', 'ye': 'е', 'yi': 'ы', 'je': 'э',
+            // ya/ja combos
+            'ya': 'я', 'ja': 'я',
+            'yo': 'ё', 'jo': 'ё',
+            'yu': 'ю', 'ju': 'ю',
+            'ye': 'е', 'yi': 'ы', 'je': 'э',
             'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'shh': 'щ',
-            'Ya': 'Я', 'Yo': 'Ё', 'Yu': 'Ю', 'Ye': 'Е', 'Yi': 'Ы', 'Je': 'Э',
+            // Capitalized
+            'Ya': 'Я', 'Ja': 'Я',
+            'Yo': 'Ё', 'Jo': 'Ё',
+            'Yu': 'Ю', 'Ju': 'Ю',
+            'Ye': 'Е', 'Yi': 'Ы', 'Je': 'Э',
             'Zh': 'Ж', 'Ch': 'Ч', 'Sh': 'Ш', 'Shh': 'Щ',
-            'YA': 'Я', 'YO': 'Ё', 'YU': 'Ю', 'YE': 'Е', 'YI': 'Ы', 'JE': 'Э',
+            // All caps
+            'YA': 'Я', 'JA': 'Я',
+            'YO': 'Ё', 'JO': 'Ё',
+            'YU': 'Ю', 'JU': 'Ю',
+            'YE': 'Е', 'YI': 'Ы', 'JE': 'Э',
             'ZH': 'Ж', 'CH': 'Ч', 'SH': 'Ш', 'SHH': 'Щ'
         };
 
@@ -329,7 +344,24 @@
         const toggleBtn = document.getElementById('toggleBtn');
 
         let latinBuffer = '';
-        let lastAddedLength = 0; // Сколько символов добавили в прошлый раз
+        let lastAddedLength = 0;
+
+        // Initialize theme based on system preference
+        function initializeTheme() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('theme');
+            
+            if (savedTheme) {
+                if (savedTheme === 'dark') {
+                    document.body.classList.add('dark');
+                }
+            } else if (prefersDark) {
+                document.body.classList.add('dark');
+            }
+        }
+
+        // Initialize theme on load
+        initializeTheme();
 
         textArea.addEventListener('input', function(e) {
             if (!translitEnabled) {
@@ -344,19 +376,18 @@
             if (e.inputType === 'insertText' && e.data) {
                 const char = e.data;
                 
-                // Добавляем символ в латинский буфер
                 latinBuffer += char;
                 
-                let replacedChars = lastAddedLength; // Сколько символов нужно удалить
+                let replacedChars = lastAddedLength;
                 let result = '';
                 
-                // Проверяем последние 3 символа
+                // Check last 3 characters
                 if (latinBuffer.length >= 3) {
                     const last3 = latinBuffer.slice(-3);
                     if (specialCombos[last3]) {
                         result = specialCombos[last3];
-                        replacedChars = lastAddedLength + 1; // Удаляем все что было + новый символ
-                        latinBuffer = latinBuffer.slice(0, -3) + last3; // Оставляем комбинацию в буфере
+                        replacedChars = lastAddedLength + 1;
+                        latinBuffer = latinBuffer.slice(0, -3) + last3;
                         lastAddedLength = result.length;
                         const newValue = currentValue.slice(0, -replacedChars) + result;
                         this.value = newValue;
@@ -365,7 +396,7 @@
                     }
                 }
                 
-                // Проверяем последние 2 символа
+                // Check last 2 characters
                 if (latinBuffer.length >= 2) {
                     const last2 = latinBuffer.slice(-2);
                     if (specialCombos[last2]) {
@@ -380,7 +411,7 @@
                     }
                 }
                 
-                // Обычная конвертация одного символа
+                // Regular single character conversion
                 result = latToCyr[char] || char;
                 lastAddedLength = result.length;
                 const newValue = currentValue.slice(0, -1) + result;
@@ -413,7 +444,7 @@
                 statusText.textContent = 'Транслит включен';
                 toggleBtn.textContent = 'Выключить (Esc)';
                 textArea.placeholder = 'Печатайте латиницей...';
-                latinBuffer = textArea.value; // Сохраняем текущий текст как латинский
+                latinBuffer = textArea.value;
             } else {
                 status.classList.add('disabled');
                 statusText.textContent = 'Транслит выключен';
@@ -432,6 +463,8 @@
 
         function toggleTheme() {
             document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
         }
     </script>
 </body>

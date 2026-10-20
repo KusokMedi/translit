@@ -20,16 +20,18 @@
     --radius: 12px;
   }
 
-  body.dark {
-    --bg: #131619;
-    --panel: #1d2226;
-    --text: #e8ecea;
-    --muted: #93a09a;
-    --border: #313840;
-    --accent: #3fb573;
-    --accent-hover: #52cd86;
-    --accent-soft: #1a2b23;
-    --shadow: 0 6px 24px rgba(0, 0, 0, .35);
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131619;
+      --panel: #1d2226;
+      --text: #e8ecea;
+      --muted: #93a09a;
+      --border: #313840;
+      --accent: #3fb573;
+      --accent-hover: #52cd86;
+      --accent-soft: #1a2b23;
+      --shadow: 0 6px 24px rgba(0, 0, 0, .35);
+    }
   }
 
   body.latin-mode {
@@ -38,10 +40,12 @@
     --accent-soft: #fdf3dd;
   }
 
-  body.dark.latin-mode {
-    --accent: #e0a534;
-    --accent-hover: #f0b64a;
-    --accent-soft: #33280f;
+  @media (prefers-color-scheme: dark) {
+    body.latin-mode {
+      --accent: #e0a534;
+      --accent-hover: #f0b64a;
+      --accent-soft: #33280f;
+    }
   }
 
   * { box-sizing: border-box; }
@@ -679,12 +683,6 @@
       gridEl.appendChild(frag);
     }
 
-    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-    function syncTheme() {
-      document.body.classList.toggle('dark', darkQuery.matches);
-    }
-
     srcEl.addEventListener('input', handleInput);
 
     srcEl.addEventListener('paste', (e) => {
@@ -709,16 +707,12 @@
       setMode(!translitOn);
     });
 
-
     modeBtn.addEventListener('click', () => setMode(!translitOn));
     clearBtn.addEventListener('click', clearAll);
     copyBtn.addEventListener('click', copyAll);
 
-    darkQuery.addEventListener('change', syncTheme);
-
     buildTable();
     if (window.innerWidth >= 900) document.getElementById('ref').open = true;
-    syncTheme();
     updateCount();
   </script>
 </body>

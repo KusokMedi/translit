@@ -90,24 +90,6 @@
     transition: background .2s ease;
   }
 
-  .icon-btn {
-    width: 38px;
-    height: 38px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: transparent;
-    color: var(--text);
-    font-size: 17px;
-    line-height: 1;
-    cursor: pointer;
-    transition: background .15s ease, border-color .15s ease;
-  }
-
-  .icon-btn:hover {
-    border-color: var(--accent);
-    background: var(--accent-soft);
-  }
-
   main {
     display: flex;
     flex-direction: column;
@@ -327,7 +309,6 @@
 <body>
   <div class="topbar">
     <div class="brand"><span class="badge">Я</span> Транслит</div>
-    <button class="icon-btn" id="themeBtn" type="button" title="Сменить тему" aria-label="Сменить тему">🌙</button>
   </div>
 
   <main>
@@ -395,7 +376,6 @@
     const modeBtn = document.getElementById('modeBtn');
     const modeBtnLabel = document.getElementById('modeBtnLabel');
     const modeText = document.getElementById('modeText');
-    const themeBtn = document.getElementById('themeBtn');
     const gridEl = document.getElementById('grid');
 
     let translitOn = true;
@@ -611,19 +591,10 @@
       gridEl.appendChild(frag);
     }
 
-    function applyTheme(theme) {
-      document.body.classList.toggle('dark', theme === 'dark');
-      themeBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
-      localStorage.setItem('theme', theme);
-    }
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    function initTheme() {
-      const saved = localStorage.getItem('theme');
-      if (saved === 'dark' || saved === 'light') {
-        applyTheme(saved);
-      } else {
-        applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-      }
+    function syncTheme() {
+      document.body.classList.toggle('dark', darkQuery.matches);
     }
 
     srcEl.addEventListener('input', handleInput);
@@ -655,12 +626,11 @@
     modeBtn.addEventListener('click', () => setMode(!translitOn));
     clearBtn.addEventListener('click', clearAll);
     copyBtn.addEventListener('click', copyAll);
-    themeBtn.addEventListener('click', () => {
-      applyTheme(document.body.classList.contains('dark') ? 'light' : 'dark');
-    });
+
+    darkQuery.addEventListener('change', syncTheme);
 
     buildTable();
-    initTheme();
+    syncTheme();
     updateCount();
   </script>
 </body>

@@ -259,8 +259,8 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
-    gap: 6px;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 5px;
     margin-top: 2px;
   }
 
@@ -269,9 +269,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    min-height: 62px;
-    padding: 6px 4px;
+    gap: 1px;
+    min-height: 68px;
+    padding: 5px 3px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: transparent;
@@ -285,19 +285,36 @@
     background: var(--accent-soft);
   }
 
-  .cell .cyr {
-    font-size: 20px;
+  .cell .top {
+    font-size: 12px;
     font-weight: 700;
-    line-height: 1;
+    line-height: 1.15;
+    color: var(--muted);
   }
 
-  .cell .lat {
-    font-size: 11px;
+  .cell .mid {
+    font-size: 10px;
     color: var(--muted);
+    line-height: 1.25;
     text-align: center;
     word-break: break-word;
-    line-height: 1.25;
   }
+
+  .cell .bot {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1.15;
+  }
+
+  .cell.shift .top { font-size: 11px; }
+
+  .cell.shift.on {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  .cell.shift.on .bot { color: var(--accent); }
 
   @media (max-width: 760px) {
     main { padding: 12px; gap: 10px; }
@@ -318,6 +335,11 @@
       <button class="linkbtn" id="modeBtn" type="button"><span id="modeBtnLabel">Включить латиницу</span><kbd>Esc</kbd></button>
     </div>
 
+    <details class="ref" id="ref">
+      <summary>Клавиатура транслита</summary>
+      <div class="grid" id="grid"></div>
+    </details>
+
     <div class="editor">
       <textarea id="src" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Начните печатать латиницей…"></textarea>
     </div>
@@ -327,11 +349,6 @@
       <button class="btn secondary" id="clearBtn" type="button">Очистить</button>
       <span class="count" id="count">0</span>
     </div>
-
-    <details class="ref">
-      <summary>Таблица транслитерации</summary>
-      <div class="grid" id="grid"></div>
-    </details>
   </main>
 
   <script>
@@ -344,26 +361,48 @@
       je: 'э', 'ä': 'э',
       ju: 'ю', yu: 'ю', 'ü': 'ю',
       ja: 'я', ya: 'я', q: 'я',
-      "'": 'ь', mz: 'ь',
+      "'": 'ь', mz: 'ь', mjz: 'ь',
       '#': 'ъ', '##': 'ъ', tvz: 'ъ'
     };
 
     const TABLE = [
-      { cyr: 'А', lat: 'a' }, { cyr: 'Б', lat: 'b' }, { cyr: 'В', lat: 'v' },
-      { cyr: 'Г', lat: 'g' }, { cyr: 'Д', lat: 'd' }, { cyr: 'Е', lat: 'e' },
-      { cyr: 'Ё', lat: 'jo, yo, ö' }, { cyr: 'Ж', lat: 'zh' }, { cyr: 'З', lat: 'z' },
-      { cyr: 'И', lat: 'i' }, { cyr: 'Й', lat: 'j' }, { cyr: 'К', lat: 'k' },
-      { cyr: 'Л', lat: 'l' }, { cyr: 'М', lat: 'm' }, { cyr: 'Н', lat: 'n' },
-      { cyr: 'О', lat: 'o' }, { cyr: 'П', lat: 'p' }, { cyr: 'Р', lat: 'r' },
-      { cyr: 'С', lat: 's' }, { cyr: 'Т', lat: 't' }, { cyr: 'У', lat: 'u' },
-      { cyr: 'Ф', lat: 'f' }, { cyr: 'Х', lat: 'h, x' }, { cyr: 'Ц', lat: 'c' },
-      { cyr: 'Ч', lat: 'ch' }, { cyr: 'Ш', lat: 'sh' }, { cyr: 'Щ', lat: 'shh, w' },
-      { cyr: 'Ъ', lat: '##, #, tvz' }, { cyr: 'Ы', lat: 'y' }, { cyr: 'Ь', lat: "' , mz" },
-      { cyr: 'Э', lat: 'je, ä' }, { cyr: 'Ю', lat: 'ju, yu, ü' }, { cyr: 'Я', lat: 'ja, ya, q' }
+      { cyr: 'А', shift: 'A', lat: 'a' },
+      { cyr: 'Б', shift: 'B', lat: 'b' },
+      { cyr: 'В', shift: 'V', lat: 'v' },
+      { cyr: 'Г', shift: 'G', lat: 'g' },
+      { cyr: 'Д', shift: 'D', lat: 'd' },
+      { cyr: 'Е', shift: 'E', lat: 'e' },
+      { cyr: 'Ё', shift: 'Jo', lat: 'jo,yo,ö' },
+      { cyr: 'Ж', shift: 'Zh', lat: 'zh' },
+      { cyr: 'З', shift: 'Z', lat: 'z' },
+      { cyr: 'И', shift: 'I', lat: 'i' },
+      { cyr: 'Й', shift: 'J', lat: 'j' },
+      { cyr: 'К', shift: 'K', lat: 'k' },
+      { cyr: 'Л', shift: 'L', lat: 'l' },
+      { cyr: 'М', shift: 'M', lat: 'm' },
+      { cyr: 'Н', shift: 'N', lat: 'n' },
+      { cyr: 'О', shift: 'O', lat: 'o' },
+      { cyr: 'П', shift: 'P', lat: 'p' },
+      { cyr: 'Р', shift: 'R', lat: 'r' },
+      { cyr: 'С', shift: 'S', lat: 's' },
+      { cyr: 'Т', shift: 'T', lat: 't' },
+      { cyr: 'У', shift: 'U', lat: 'u' },
+      { cyr: 'Ф', shift: 'F', lat: 'f' },
+      { cyr: 'Х', shift: 'H', lat: 'h,x' },
+      { cyr: 'Ц', shift: 'C', lat: 'c' },
+      { cyr: 'Ч', shift: 'Ch', lat: 'ch' },
+      { cyr: 'Ш', shift: 'Sh', lat: 'sh' },
+      { cyr: 'Щ', shift: 'Shh', lat: 'shh,w' },
+      { cyr: 'Ъ', shift: '##', lat: '#,tvz' },
+      { cyr: 'Ы', shift: 'Y', lat: 'y' },
+      { cyr: 'Ь', shift: "'", lat: "',mjz" },
+      { cyr: 'Э', shift: 'Je', lat: 'je,ä' },
+      { cyr: 'Ю', shift: 'Ju', lat: 'ju,yu,ü' },
+      { cyr: 'Я', shift: 'Ja', lat: 'ja,ya,q' }
     ];
 
     const LAT_KEYS = Object.keys(LAT2CYR).sort((a, b) => b.length - a.length);
-    const LIVE_KEYS = LAT_KEYS.filter(k => k !== 'tvz' && k !== 'mz' && k !== '##');
+    const LIVE_KEYS = LAT_KEYS.filter(k => k !== 'tvz' && k !== 'mz' && k !== 'mjz' && k !== '##');
     const PREFIXES = new Set();
     for (const k of LIVE_KEYS) {
       for (let i = 1; i < k.length; i++) PREFIXES.add(k.slice(0, i));
@@ -380,6 +419,8 @@
 
     let translitOn = true;
     let pending = '';
+    let shiftOn = false;
+    let lastPlus = false;
 
     function isAllCaps(sample) {
       return sample === sample.toUpperCase() && sample !== sample.toLowerCase();
@@ -474,9 +515,27 @@
     function handleInput(e) {
       if (!translitOn) {
         pending = '';
+        lastPlus = false;
         updateCount();
         return;
       }
+
+      if (e.inputType === 'insertText' && e.data === '+') {
+        if (lastPlus) {
+          lastPlus = false;
+          updateCount();
+          return;
+        }
+        const pos = srcEl.selectionStart;
+        srcEl.value = srcEl.value.slice(0, pos - 1) + srcEl.value.slice(pos);
+        srcEl.setSelectionRange(pos - 1, pos - 1);
+        commitPending();
+        lastPlus = true;
+        updateCount();
+        return;
+      }
+
+      lastPlus = false;
 
       if (e.inputType === 'insertText' && e.data && e.data.length === 1) {
         const pos = srcEl.selectionStart;
@@ -507,6 +566,7 @@
 
     function setMode(on) {
       commitPending();
+      lastPlus = false;
       translitOn = on;
       if (on) {
         const before = srcEl.value;
@@ -527,6 +587,7 @@
     function clearAll() {
       srcEl.value = '';
       pending = '';
+      lastPlus = false;
       updateCount();
       srcEl.focus();
     }
@@ -566,6 +627,27 @@
 
     function buildTable() {
       const frag = document.createDocumentFragment();
+
+      const shiftCell = document.createElement('button');
+      shiftCell.type = 'button';
+      shiftCell.className = 'cell shift' + (shiftOn ? ' on' : '');
+      shiftCell.title = 'Заглавные буквы';
+
+      const shiftTop = document.createElement('span');
+      shiftTop.className = 'top';
+      shiftTop.textContent = 'shift';
+      const shiftBot = document.createElement('span');
+      shiftBot.className = 'bot';
+      shiftBot.textContent = '⇧';
+      shiftCell.append(shiftTop, shiftBot);
+
+      shiftCell.addEventListener('click', () => {
+        shiftOn = !shiftOn;
+        shiftCell.classList.toggle('on', shiftOn);
+        srcEl.focus();
+      });
+      frag.appendChild(shiftCell);
+
       for (const entry of TABLE) {
         const primary = entry.lat.split(',')[0].trim();
 
@@ -574,20 +656,29 @@
         cell.className = 'cell';
         cell.title = 'Вставить «' + entry.cyr + '»';
 
-        const upper = document.createElement('span');
-        upper.className = 'cyr';
-        upper.textContent = entry.cyr;
+        const top = document.createElement('span');
+        top.className = 'top';
+        top.textContent = entry.shift;
 
-        const lower = document.createElement('div');
-        lower.className = 'lat';
-        lower.textContent = entry.lat;
+        const mid = document.createElement('span');
+        mid.className = 'mid';
+        mid.textContent = entry.lat;
 
-        cell.append(upper, lower);
+        const bot = document.createElement('span');
+        bot.className = 'bot';
+        bot.textContent = entry.cyr;
+
+        cell.append(top, mid, bot);
         cell.addEventListener('click', () => {
-          insertChar(translitOn ? entry.cyr.toLowerCase() : primary);
+          if (translitOn) {
+            insertChar(shiftOn ? entry.cyr : entry.cyr.toLowerCase());
+          } else {
+            insertChar(shiftOn ? primary.toUpperCase() : primary);
+          }
         });
         frag.appendChild(cell);
       }
+
       gridEl.appendChild(frag);
     }
 
@@ -630,6 +721,7 @@
     darkQuery.addEventListener('change', syncTheme);
 
     buildTable();
+    if (window.innerWidth >= 900) document.getElementById('ref').open = true;
     syncTheme();
     updateCount();
   </script>

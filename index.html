@@ -261,23 +261,36 @@
 
   .ref:not([open]) summary::after { transform: rotate(-90deg); }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 5px;
+  .kbd {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     margin-top: 2px;
   }
 
+  .krow {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+  }
+
+  .krow .cell {
+    flex: 0 0 auto;
+    width: calc((100% - 48px) / 13);
+  }
+
   .cell {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 1px;
-    min-height: 68px;
-    padding: 5px 3px;
+    min-width: 0;
+    min-height: 58px;
+    padding: 13px 3px 5px;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 7px;
     background: transparent;
     color: var(--text);
     cursor: pointer;
@@ -289,19 +302,16 @@
     background: var(--accent-soft);
   }
 
-  .cell .top {
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1.15;
-    color: var(--muted);
-  }
+  .cell:active { transform: translateY(1px); }
 
-  .cell .mid {
-    font-size: 10px;
+  .cell .cap {
+    position: absolute;
+    top: 3px;
+    left: 5px;
+    font-size: 8.5px;
+    line-height: 1;
     color: var(--muted);
-    line-height: 1.25;
-    text-align: center;
-    word-break: break-word;
+    opacity: .55;
   }
 
   .cell .bot {
@@ -311,19 +321,45 @@
     line-height: 1.15;
   }
 
-  .cell.shift .top { font-size: 11px; }
-
-  .cell.shift.on {
-    border-color: var(--accent);
-    background: var(--accent-soft);
+  .cell .mid {
+    font-size: 9px;
+    color: var(--muted);
+    line-height: 1.15;
+    text-align: center;
+    word-break: break-word;
   }
 
-  .cell.shift.on .bot { color: var(--accent); }
+  .krow-extra {
+    margin-top: 2px;
+  }
+
+  .krow-extra .cell {
+    width: auto;
+    min-height: 32px;
+    padding: 5px 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .krow-extra .shift { flex: 0 0 16%; }
+  .krow-extra .space { flex: 0 0 56%; }
+
+  .krow-extra .shift.on {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
 
   @media (max-width: 760px) {
     main { padding: 12px; gap: 10px; }
-    .editor textarea { min-height: 42vh; padding: 14px; font-size: 17px; }
+    .editor textarea { min-height: 40vh; padding: 14px; font-size: 17px; }
     .mode { font-size: 13px; }
+    .cell { min-height: 42px; padding: 11px 2px 3px; border-radius: 6px; }
+    .cell .bot { font-size: 14px; }
+    .cell .mid { display: none; }
+    .cell .cap { left: 3px; font-size: 7.5px; }
+    .krow .cell { width: calc((100% - 36px) / 13); }
+    .krow, .kbd { gap: 3px; }
   }
 </style>
 </head>
@@ -341,7 +377,15 @@
 
     <details class="ref" id="ref">
       <summary>Клавиатура транслита</summary>
-      <div class="grid" id="grid"></div>
+      <div class="kbd">
+        <div class="krow" id="krow0"></div>
+        <div class="krow" id="krow1"></div>
+        <div class="krow" id="krow2"></div>
+        <div class="krow krow-extra">
+          <button class="cell shift" id="shiftKey" type="button">shift</button>
+          <button class="cell space" id="spaceKey" type="button">пробел</button>
+        </div>
+      </div>
     </details>
 
     <div class="editor">
@@ -369,40 +413,46 @@
       '#': 'ъ', '##': 'ъ', tvz: 'ъ'
     };
 
-    const TABLE = [
-      { cyr: 'А', shift: 'A', lat: 'a' },
-      { cyr: 'Б', shift: 'B', lat: 'b' },
-      { cyr: 'В', shift: 'V', lat: 'v' },
-      { cyr: 'Г', shift: 'G', lat: 'g' },
-      { cyr: 'Д', shift: 'D', lat: 'd' },
-      { cyr: 'Е', shift: 'E', lat: 'e' },
-      { cyr: 'Ё', shift: 'Jo', lat: 'jo,yo,ö,`' },
-      { cyr: 'Ж', shift: 'Zh', lat: 'zh' },
-      { cyr: 'З', shift: 'Z', lat: 'z' },
-      { cyr: 'И', shift: 'I', lat: 'i' },
-      { cyr: 'Й', shift: 'J', lat: 'j' },
-      { cyr: 'К', shift: 'K', lat: 'k' },
-      { cyr: 'Л', shift: 'L', lat: 'l' },
-      { cyr: 'М', shift: 'M', lat: 'm' },
-      { cyr: 'Н', shift: 'N', lat: 'n' },
-      { cyr: 'О', shift: 'O', lat: 'o' },
-      { cyr: 'П', shift: 'P', lat: 'p' },
-      { cyr: 'Р', shift: 'R', lat: 'r' },
-      { cyr: 'С', shift: 'S', lat: 's' },
-      { cyr: 'Т', shift: 'T', lat: 't' },
-      { cyr: 'У', shift: 'U', lat: 'u' },
-      { cyr: 'Ф', shift: 'F', lat: 'f' },
-      { cyr: 'Х', shift: 'H', lat: 'h,x' },
-      { cyr: 'Ц', shift: 'C', lat: 'c' },
-      { cyr: 'Ч', shift: 'Ch', lat: 'ch' },
-      { cyr: 'Ш', shift: 'Sh', lat: 'sh' },
-      { cyr: 'Щ', shift: 'Shh', lat: 'shh,w' },
-      { cyr: 'Ъ', shift: '##', lat: '#,tvz' },
-      { cyr: 'Ы', shift: 'Y', lat: 'y' },
-      { cyr: 'Ь', shift: "'", lat: "',mjz" },
-      { cyr: 'Э', shift: 'Je', lat: 'je,ä' },
-      { cyr: 'Ю', shift: 'Ju', lat: 'ju,yu,ü' },
-      { cyr: 'Я', shift: 'Ja', lat: 'ja,ya,q' }
+    const KEY_ROWS = [
+      [
+        { cyr: 'Ё', cap: '`', lat: 'jo,yo,ö,`' },
+        { cyr: 'Й', cap: 'q', lat: 'j' },
+        { cyr: 'Ц', cap: 'w', lat: 'c' },
+        { cyr: 'У', cap: 'e', lat: 'u' },
+        { cyr: 'К', cap: 'r', lat: 'k' },
+        { cyr: 'Е', cap: 't', lat: 'e' },
+        { cyr: 'Н', cap: 'y', lat: 'n' },
+        { cyr: 'Г', cap: 'u', lat: 'g' },
+        { cyr: 'Ш', cap: 'i', lat: 'sh' },
+        { cyr: 'Щ', cap: 'o', lat: 'shh,w' },
+        { cyr: 'З', cap: 'p', lat: 'z' },
+        { cyr: 'Х', cap: '[', lat: 'h,x' },
+        { cyr: 'Ъ', cap: ']', lat: '#,tvz' }
+      ],
+      [
+        { cyr: 'Ф', cap: 'a', lat: 'f' },
+        { cyr: 'Ы', cap: 's', lat: 'y' },
+        { cyr: 'В', cap: 'd', lat: 'v' },
+        { cyr: 'А', cap: 'f', lat: 'a' },
+        { cyr: 'П', cap: 'g', lat: 'p' },
+        { cyr: 'Р', cap: 'h', lat: 'r' },
+        { cyr: 'О', cap: 'j', lat: 'o' },
+        { cyr: 'Л', cap: 'k', lat: 'l' },
+        { cyr: 'Д', cap: 'l', lat: 'd' },
+        { cyr: 'Ж', cap: ';', lat: 'zh' },
+        { cyr: 'Э', cap: "'", lat: 'je,ä' }
+      ],
+      [
+        { cyr: 'Я', cap: 'z', lat: 'ja,ya,q' },
+        { cyr: 'Ч', cap: 'x', lat: 'ch' },
+        { cyr: 'С', cap: 'c', lat: 's' },
+        { cyr: 'М', cap: 'v', lat: 'm' },
+        { cyr: 'И', cap: 'b', lat: 'i' },
+        { cyr: 'Т', cap: 'n', lat: 't' },
+        { cyr: 'Ь', cap: 'm', lat: "',mjz" },
+        { cyr: 'Б', cap: ',', lat: 'b' },
+        { cyr: 'Ю', cap: '.', lat: 'ju,yu,ü' }
+      ]
     ];
 
     const LAT_KEYS = Object.keys(LAT2CYR).sort((a, b) => b.length - a.length);
@@ -418,7 +468,8 @@
     const modeBtn = document.getElementById('modeBtn');
     const modeBtnLabel = document.getElementById('modeBtnLabel');
     const modeText = document.getElementById('modeText');
-    const gridEl = document.getElementById('grid');
+    const shiftKey = document.getElementById('shiftKey');
+    const spaceKey = document.getElementById('spaceKey');
 
     let translitOn = true;
     let shiftOn = false;
@@ -626,61 +677,51 @@
       srcEl.focus();
     }
 
-    function buildTable() {
-      const frag = document.createDocumentFragment();
+    function makeKey(entry) {
+      const primary = entry.lat.split(',')[0].trim();
 
-      const shiftCell = document.createElement('button');
-      shiftCell.type = 'button';
-      shiftCell.className = 'cell shift' + (shiftOn ? ' on' : '');
-      shiftCell.title = 'Заглавные буквы';
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'cell';
+      cell.title = entry.cyr + ' — набрать: ' + entry.lat;
 
-      const shiftTop = document.createElement('span');
-      shiftTop.className = 'top';
-      shiftTop.textContent = 'shift';
-      const shiftBot = document.createElement('span');
-      shiftBot.className = 'bot';
-      shiftBot.textContent = '⇧';
-      shiftCell.append(shiftTop, shiftBot);
+      const cap = document.createElement('span');
+      cap.className = 'cap';
+      cap.textContent = entry.cap;
 
-      shiftCell.addEventListener('click', () => {
-        shiftOn = !shiftOn;
-        shiftCell.classList.toggle('on', shiftOn);
-        srcEl.focus();
+      const bot = document.createElement('span');
+      bot.className = 'bot';
+      bot.textContent = entry.cyr;
+
+      const mid = document.createElement('span');
+      mid.className = 'mid';
+      mid.textContent = entry.lat;
+
+      cell.append(cap, bot, mid);
+      cell.addEventListener('click', () => {
+        if (translitOn) {
+          insertChar(shiftOn ? entry.cyr : entry.cyr.toLowerCase());
+        } else {
+          insertChar(shiftOn ? primary.toUpperCase() : primary);
+        }
       });
-      frag.appendChild(shiftCell);
+      return cell;
+    }
 
-      for (const entry of TABLE) {
-        const primary = entry.lat.split(',')[0].trim();
+    function buildTable() {
+      KEY_ROWS.forEach((row, i) => {
+        const rowEl = document.getElementById('krow' + i);
+        for (const entry of row) rowEl.appendChild(makeKey(entry));
+      });
 
-        const cell = document.createElement('button');
-        cell.type = 'button';
-        cell.className = 'cell';
-        cell.title = 'Вставить «' + entry.cyr + '»';
+      shiftKey.addEventListener('click', () => {
+        shiftOn = !shiftOn;
+        shiftKey.classList.toggle('on', shiftOn);
+      });
 
-        const top = document.createElement('span');
-        top.className = 'top';
-        top.textContent = entry.shift;
-
-        const mid = document.createElement('span');
-        mid.className = 'mid';
-        mid.textContent = entry.lat;
-
-        const bot = document.createElement('span');
-        bot.className = 'bot';
-        bot.textContent = entry.cyr;
-
-        cell.append(top, mid, bot);
-        cell.addEventListener('click', () => {
-          if (translitOn) {
-            insertChar(shiftOn ? entry.cyr : entry.cyr.toLowerCase());
-          } else {
-            insertChar(shiftOn ? primary.toUpperCase() : primary);
-          }
-        });
-        frag.appendChild(cell);
-      }
-
-      gridEl.appendChild(frag);
+      spaceKey.addEventListener('click', () => {
+        insertChar(' ');
+      });
     }
 
     srcEl.addEventListener('input', handleInput);

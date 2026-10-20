@@ -402,9 +402,8 @@
     ];
 
     const LAT_KEYS = Object.keys(LAT2CYR).sort((a, b) => b.length - a.length);
-    const LIVE_KEYS = LAT_KEYS.filter(k => k !== 'tvz' && k !== 'mz' && k !== 'mjz' && k !== '##');
     const PREFIXES = new Set();
-    for (const k of LIVE_KEYS) {
+    for (const k of LAT_KEYS) {
       for (let i = 1; i < k.length; i++) PREFIXES.add(k.slice(0, i));
     }
 
@@ -418,9 +417,11 @@
     const gridEl = document.getElementById('grid');
 
     let translitOn = true;
-    let pending = '';
     let shiftOn = false;
     let lastPlus = false;
+    let tailSource = '';
+    let tailRendered = '';
+    let tailStart = 0;
 
     function isAllCaps(sample) {
       return sample === sample.toUpperCase() && sample !== sample.toLowerCase();
@@ -461,26 +462,25 @@
       let committed = '';
       let i = 0;
       while (i < buffer.length) {
+        const rest = buffer.slice(i);
+        if (PREFIXES.has(rest.toLowerCase())) {
+          return { committed: committed, pending: rest };
+        }
         let hit = null;
-        for (const key of LIVE_KEYS) {
+        for (const key of LAT_KEYS) {
           if (i + key.length <= buffer.length &&
               buffer.substr(i, key.length).toLowerCase() === key) {
             hit = key;
             break;
           }
         }
-        if (!hit) {
+        if (hit) {
+          committed += applyCase(LAT2CYR[hit], buffer.substr(i, hit.length));
+          i += hit.length;
+        } else {
           committed += buffer.charAt(i);
           i += 1;
-          continue;
         }
-        const atEnd = i + hit.length === buffer.length;
-        const sample = buffer.substr(i, hit.length);
-        if (atEnd && PREFIXES.has(hit)) {
-          return { committed: committed, pending: sample };
-        }
-        committed += applyCase(LAT2CYR[hit], sample);
-        i += hit.length;
       }
       return { committed: committed, pending: '' };
     }
@@ -498,23 +498,14 @@
       updateCount();
     }
 
-    function commitPending() {
-      if (!pending) return;
-      const pos = srcEl.selectionStart;
-      const start = pos - pending.length;
-      if (start >= 0 && srcEl.value.slice(start, pos) === pending) {
-        const fixed = toCyrillic(pending);
-        srcEl.value = srcEl.value.slice(0, start) + fixed + srcEl.value.slice(pos);
-        const caret = start + fixed.length;
-        srcEl.setSelectionRange(caret, caret);
-        updateCount();
-      }
-      pending = '';
+    function resetTail() {
+      tailSource = '';
+      tailRendered = '';
     }
 
     function handleInput(e) {
       if (!translitOn) {
-        pending = '';
+        resetTail();
         lastPlus = false;
         updateCount();
         return;
@@ -529,7 +520,7 @@
         const pos = srcEl.selectionStart;
         srcEl.value = srcEl.value.slice(0, pos - 1) + srcEl.value.slice(pos);
         srcEl.setSelectionRange(pos - 1, pos - 1);
-        commitPending();
+        resetTail();
         lastPlus = true;
         updateCount();
         return;
@@ -540,32 +531,38 @@
       if (e.inputType === 'insertText' && e.data && e.data.length === 1) {
         const pos = srcEl.selectionStart;
         const at = pos - 1;
-        const prev = srcEl.value.slice(Math.max(0, at - pending.length), at);
-        if (pending && prev !== pending) pending = '';
 
-        const buffer = pending + e.data;
-        const resolved = resolveLive(buffer);
-        const inserted = resolved.committed + resolved.pending;
+        const tailOk = tailSource &&
+          tailStart + tailRendered.length === at &&
+          srcEl.value.slice(tailStart, at) === tailRendered;
 
-        pending = resolved.pending;
-
-        if (inserted !== buffer) {
-          const start = at - (buffer.length - e.data.length);
-          srcEl.value = srcEl.value.slice(0, start) + inserted + srcEl.value.slice(pos);
-          const caret = start + inserted.length;
-          srcEl.setSelectionRange(caret, caret);
+        if (!tailOk) {
+          resetTail();
+          tailStart = at;
         }
+
+        const resolved = resolveLive(tailSource + e.data);
+        const partial = toCyrillic(resolved.pending);
+        const rendered = resolved.committed + partial;
+
+        srcEl.value = srcEl.value.slice(0, tailStart) + rendered + srcEl.value.slice(pos);
+        const caret = tailStart + rendered.length;
+        srcEl.setSelectionRange(caret, caret);
+
+        tailStart = tailStart + resolved.committed.length;
+        tailRendered = partial;
+        tailSource = resolved.pending;
 
         updateCount();
         return;
       }
 
-      commitPending();
+      resetTail();
       updateCount();
     }
 
     function setMode(on) {
-      commitPending();
+      resetTail();
       lastPlus = false;
       translitOn = on;
       if (on) {
@@ -586,7 +583,7 @@
 
     function clearAll() {
       srcEl.value = '';
-      pending = '';
+      resetTail();
       lastPlus = false;
       updateCount();
       srcEl.focus();
@@ -620,7 +617,7 @@
     }
 
     function insertChar(text) {
-      commitPending();
+      resetTail();
       replaceSelection(text);
       srcEl.focus();
     }
@@ -695,14 +692,14 @@
       const text = e.clipboardData && e.clipboardData.getData('text');
       if (!text) return;
       e.preventDefault();
-      commitPending();
+      resetTail();
       replaceSelection(toCyrillic(text));
     });
 
     srcEl.addEventListener('keydown', (e) => {
       if (e.ctrlKey || e.altKey || e.metaKey) return;
       if (['Enter', 'Tab', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(e.key)) {
-        commitPending();
+        resetTail();
       }
     });
 
@@ -712,7 +709,6 @@
       setMode(!translitOn);
     });
 
-    srcEl.addEventListener('blur', commitPending);
 
     modeBtn.addEventListener('click', () => setMode(!translitOn));
     clearBtn.addEventListener('click', clearAll);

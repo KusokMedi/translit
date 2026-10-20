@@ -23,7 +23,7 @@
 |---|---|---|
 | А Б В Г Д Е З И Й К Л М Н О П Р С Т У Ф Ц Ы | A B V G D E Z I J K L M N O P R S T U F C Y | a b v g d e z i j k l m n o p r s t u f c y |
 | Ж Ч Ш Щ | Zh Ch Sh Shh | zh ch sh shh, w |
-| Ё | Jo | jo, yo, ö |
+| Ё | Jo | jo, yo, ö, ` |
 | Э | Je | je, ä |
 | Ю | Ju | ju, yu, ü |
 | Я | Ja | ja, ya, q |

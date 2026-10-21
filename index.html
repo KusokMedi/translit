@@ -341,7 +341,13 @@
   }
 
   .key.punc .mid {
-    font-size: 9px;
+    font-size: 10px;
+    visibility: hidden;
+  }
+
+  .kbd.shifted .key.punc .mid {
+    visibility: visible;
+    color: var(--accent);
   }
 
   .key .lbl {
@@ -424,9 +430,9 @@
     };
 
     const F_ROW = [{ lbl: 'esc', act: 'esc' }];
-    for (let i = 1; i <= 12; i++) F_ROW.push({ lbl: 'F' + i, act: 'none' });
+    for (let i = 1; i <= 12; i++) F_ROW.push({ blank: true, name: 'F' + i });
     F_ROW.push(
-      { lbl: 'insert', act: 'none' },
+      { blank: true, name: 'insert' },
       { lbl: 'home', act: 'home' },
       { lbl: 'end', act: 'end' },
       { lbl: 'delete', act: 'delete' }
@@ -451,7 +457,7 @@
         { w: 2, lbl: '⌫', act: 'backspace' }
       ],
       [
-        { w: 1.5, lbl: 'tab', act: 'none' },
+        { w: 1.5, blank: true, name: 'tab' },
         { cyr: 'Й', cap: 'q', lat: 'j' },
         { cyr: 'Ц', cap: 'w', lat: 'c' },
         { cyr: 'У', cap: 'e', lat: 'u' },
@@ -688,7 +694,7 @@
       modeBtnLabel.textContent = on ? 'Включить латиницу' : 'Включить кириллицу';
       srcEl.placeholder = on ? 'Начните печатать латиницей…' : 'Обычный ввод — без транслита…';
       updateCount();
-      srcEl.focus();
+      srcEl.focus({ preventScroll: true });
     }
 
     function clearAll() {
@@ -696,7 +702,7 @@
       resetTail();
       lastPlus = false;
       updateCount();
-      srcEl.focus();
+      srcEl.focus({ preventScroll: true });
     }
 
     function copyAll() {
@@ -715,7 +721,7 @@
         try { document.execCommand('copy'); } catch (err) {}
         const caret = srcEl.value.length;
         srcEl.setSelectionRange(caret, caret);
-        srcEl.focus();
+        srcEl.focus({ preventScroll: true });
         done();
       };
 
@@ -729,7 +735,7 @@
     function insertChar(text) {
       resetTail();
       replaceSelection(text);
-      srcEl.focus();
+      srcEl.focus({ preventScroll: true });
     }
 
     function span(cls, text) {
@@ -747,6 +753,7 @@
       if (modKeys.caps) modKeys.caps.classList.toggle('on', capsOn);
       if (modKeys.l) modKeys.l.classList.toggle('on', shiftL);
       if (modKeys.r) modKeys.r.classList.toggle('on', shiftR);
+      kbdEl.classList.toggle('shifted', capsOn || shiftL || shiftR);
     }
 
     function consumeShift() {
@@ -784,7 +791,7 @@
         srcEl.setSelectionRange(start - 1, start - 1);
         updateCount();
       }
-      srcEl.focus();
+      srcEl.focus({ preventScroll: true });
     }
 
     function deleteForward() {
@@ -798,22 +805,22 @@
         srcEl.setSelectionRange(start, start);
         updateCount();
       }
-      srcEl.focus();
+      srcEl.focus({ preventScroll: true });
     }
 
     function moveCaret(pos) {
-      srcEl.focus();
+      srcEl.focus({ preventScroll: true });
       srcEl.setSelectionRange(pos, pos);
     }
 
     function runAction(act, side) {
       switch (act) {
         case 'esc': setMode(!translitOn); break;
-        case 'caps': capsOn = !capsOn; syncMods(); srcEl.focus(); break;
+        case 'caps': capsOn = !capsOn; syncMods(); srcEl.focus({ preventScroll: true }); break;
         case 'shift':
           if (side === 'l') shiftL = !shiftL; else shiftR = !shiftR;
           syncMods();
-          srcEl.focus();
+          srcEl.focus({ preventScroll: true });
           break;
         case 'space': insertChar(' '); break;
         case 'enter': insertChar('\n'); break;
@@ -846,6 +853,7 @@
         el = document.createElement('div');
         el.className = 'key dead blank';
         el.setAttribute('aria-hidden', 'true');
+        if (entry.name) el.title = entry.name;
       } else if (entry.act && entry.act !== 'none') {
         el = document.createElement('button');
         el.type = 'button';

@@ -589,7 +589,6 @@
     let capsOn = false;
     let shiftL = false;
     let shiftR = false;
-    let lastPlus = false;
     let tailSource = '';
     let tailRendered = '';
     let tailStart = 0;
@@ -697,31 +696,20 @@
     function handleInput(e) {
       if (!translitOn) {
         resetTail();
-        lastPlus = false;
         updateCount();
         return;
       }
-
-      if (e.inputType === 'insertText' && e.data === '+') {
-        if (lastPlus) {
-          lastPlus = false;
-          updateCount();
-          return;
-        }
-        const pos = srcEl.selectionStart;
-        srcEl.value = srcEl.value.slice(0, pos - 1) + srcEl.value.slice(pos);
-        srcEl.setSelectionRange(pos - 1, pos - 1);
-        resetTail();
-        lastPlus = true;
-        updateCount();
-        return;
-      }
-
-      lastPlus = false;
 
       if (e.inputType === 'insertText' && e.data && e.data.length === 1) {
-        const pos = srcEl.selectionStart;
-        const at = pos - 1;
+        let pos = srcEl.selectionStart;
+        let at = pos - 1;
+
+        if (at > 0 && srcEl.value.charAt(at - 1) === '+' && /^[A-Za-z]$/.test(e.data)) {
+          srcEl.value = srcEl.value.slice(0, at - 1) + srcEl.value.slice(at);
+          pos -= 1;
+          at -= 1;
+          srcEl.setSelectionRange(pos, pos);
+        }
 
         const tailOk = tailSource &&
           tailStart + tailRendered.length === at &&
@@ -754,7 +742,6 @@
 
     function setMode(on) {
       resetTail();
-      lastPlus = false;
       translitOn = on;
       if (on) {
         const before = srcEl.value;
@@ -775,14 +762,12 @@
     function clearAll() {
       srcEl.value = '';
       resetTail();
-      lastPlus = false;
       updateCount();
       srcEl.focus({ preventScroll: true });
     }
 
     function replaceAll(text) {
       resetTail();
-      lastPlus = false;
       srcEl.value = text;
       srcEl.setSelectionRange(text.length, text.length);
       updateCount();

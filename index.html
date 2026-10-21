@@ -288,7 +288,7 @@
     justify-content: center;
     gap: 1px;
     min-width: 0;
-    height: 44px;
+    height: 40px;
     margin: 2px;
     padding: 2px;
     border: 1px solid var(--border);
@@ -301,7 +301,8 @@
   }
 
   .key.letter:hover,
-  .key.mod:hover {
+  .key.punc:hover,
+  .key.act:hover {
     border-color: var(--accent);
     background: var(--accent-soft);
   }
@@ -333,6 +334,16 @@
     word-break: break-word;
   }
 
+  .key.punc .bot {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .key.punc .mid {
+    font-size: 9px;
+  }
+
   .key .lbl {
     font-size: 9.5px;
     line-height: 1.1;
@@ -348,19 +359,19 @@
 
   .key.dead:active { transform: none; }
 
-  .key.mod.on {
+  .key.act.on {
     border-color: var(--accent);
     background: var(--accent-soft);
   }
 
-  .key.mod.on .lbl { color: var(--accent); }
+  .key.act.on .lbl { color: var(--accent); }
 
   @media (max-width: 760px) {
     main { padding: 12px; gap: 10px; }
     .editor textarea { min-height: 40vh; padding: 14px; font-size: 17px; }
     .mode { font-size: 13px; }
     .kbd { min-width: 560px; }
-    .key { height: 38px; margin: 1.5px; }
+    .key { height: 34px; margin: 1.5px; }
     .key .bot { font-size: 13px; }
     .key .mid { display: none; }
     .key .cap { top: 1px; left: 3px; font-size: 7px; }
@@ -412,25 +423,35 @@
       '#': 'ъ', '##': 'ъ', tvz: 'ъ'
     };
 
+    const F_ROW = [{ lbl: 'esc', act: 'esc' }];
+    for (let i = 1; i <= 12; i++) F_ROW.push({ lbl: 'F' + i, act: 'none' });
+    F_ROW.push(
+      { lbl: 'insert', act: 'none' },
+      { lbl: 'home', act: 'home' },
+      { lbl: 'end', act: 'end' },
+      { lbl: 'delete', act: 'delete' }
+    );
+
     const KEY_ROWS = [
+      F_ROW,
       [
-        { w: 1, lbl: 'esc' },
         { cyr: 'Ё', cap: '`', lat: 'jo,yo,ö,`' },
-        { w: 1, lbl: '1' },
-        { w: 1, lbl: '2' },
-        { w: 1, lbl: '3' },
-        { w: 1, lbl: '4' },
-        { w: 1, lbl: '5' },
-        { w: 1, lbl: '6' },
-        { w: 1, lbl: '7' },
-        { w: 1, lbl: '8' },
-        { w: 1, lbl: '9' },
-        { w: 1, lbl: '0' },
-        { w: 1, lbl: '-' },
-        { w: 2, lbl: '⌫' }
+        { ch: '1' },
+        { ch: '2' },
+        { ch: '3' },
+        { ch: '4' },
+        { ch: '5' },
+        { ch: '6' },
+        { ch: '7' },
+        { ch: '8' },
+        { ch: '9' },
+        { ch: '0' },
+        { ch: '-', up: '_' },
+        { ch: '=', up: '+' },
+        { w: 2, lbl: '⌫', act: 'backspace' }
       ],
       [
-        { w: 1.5, lbl: 'tab' },
+        { w: 1.5, lbl: 'tab', act: 'none' },
         { cyr: 'Й', cap: 'q', lat: 'j' },
         { cyr: 'Ц', cap: 'w', lat: 'c' },
         { cyr: 'У', cap: 'e', lat: 'u' },
@@ -443,10 +464,10 @@
         { cyr: 'З', cap: 'p', lat: 'z' },
         { cyr: 'Х', cap: '[', lat: 'h,x' },
         { cyr: 'Ъ', cap: ']', lat: '#,tvz' },
-        { w: 1.5, lbl: '\\' }
+        { w: 1.5, ch: '\\', up: '|' }
       ],
       [
-        { w: 1.75, lbl: 'caps' },
+        { w: 1.75, lbl: 'caps', act: 'caps' },
         { cyr: 'Ф', cap: 'a', lat: 'f' },
         { cyr: 'Ы', cap: 's', lat: 'y' },
         { cyr: 'В', cap: 'd', lat: 'v' },
@@ -458,10 +479,10 @@
         { cyr: 'Д', cap: 'l', lat: 'd' },
         { cyr: 'Ж', cap: ';', lat: 'zh' },
         { cyr: 'Э', cap: "'", lat: 'je,ä' },
-        { w: 2.25, lbl: 'enter' }
+        { w: 2.25, lbl: 'enter', act: 'enter' }
       ],
       [
-        { w: 2.25, lbl: 'shift', role: 'shift' },
+        { w: 1.5, lbl: 'shift', act: 'shift' },
         { cyr: 'Я', cap: 'z', lat: 'ja,ya,q' },
         { cyr: 'Ч', cap: 'x', lat: 'ch' },
         { cyr: 'С', cap: 'c', lat: 's' },
@@ -471,17 +492,19 @@
         { cyr: 'Ь', cap: 'm', lat: "',mjz" },
         { cyr: 'Б', cap: ',', lat: 'b' },
         { cyr: 'Ю', cap: '.', lat: 'ju,yu,ü' },
-        { w: 1, lbl: '.' },
-        { w: 2.75, lbl: 'shift', role: 'shift' }
+        { ch: ',', up: '<' },
+        { ch: '.', up: '>' },
+        { ch: '/', up: '?' },
+        { w: 1.5, lbl: 'shift', act: 'shift' }
       ],
       [
-        { w: 1.25, lbl: 'ctrl' },
-        { w: 1.25, lbl: 'win' },
-        { w: 1.25, lbl: 'alt' },
-        { w: 7.5, lbl: 'пробел', role: 'space' },
-        { w: 1.25, lbl: 'alt' },
-        { w: 1.25, lbl: 'fn' },
-        { w: 1.25, lbl: 'ctrl' }
+        { w: 1.25, blank: true },
+        { w: 1.25, blank: true },
+        { w: 1.25, blank: true },
+        { w: 7.5, lbl: 'пробел', act: 'space' },
+        { w: 1.25, blank: true },
+        { w: 1.25, blank: true },
+        { w: 1.25, blank: true }
       ]
     ];
 
@@ -723,9 +746,60 @@
       insertChar(shiftOn ? primary.toUpperCase() : primary);
     }
 
+    function insertPunc(entry) {
+      insertChar(shiftOn && entry.up ? entry.up : entry.ch);
+    }
+
     function toggleShift() {
       shiftOn = !shiftOn;
       for (const k of shiftKeys) k.classList.toggle('on', shiftOn);
+    }
+
+    function backspace() {
+      const start = srcEl.selectionStart;
+      const end = srcEl.selectionEnd;
+      resetTail();
+      if (start !== end) {
+        replaceSelection('');
+      } else if (start > 0) {
+        srcEl.value = srcEl.value.slice(0, start - 1) + srcEl.value.slice(start);
+        srcEl.setSelectionRange(start - 1, start - 1);
+        updateCount();
+      }
+      srcEl.focus();
+    }
+
+    function deleteForward() {
+      const start = srcEl.selectionStart;
+      const end = srcEl.selectionEnd;
+      resetTail();
+      if (start !== end) {
+        replaceSelection('');
+      } else if (start < srcEl.value.length) {
+        srcEl.value = srcEl.value.slice(0, start) + srcEl.value.slice(start + 1);
+        srcEl.setSelectionRange(start, start);
+        updateCount();
+      }
+      srcEl.focus();
+    }
+
+    function moveCaret(pos) {
+      srcEl.focus();
+      srcEl.setSelectionRange(pos, pos);
+    }
+
+    function runAction(act) {
+      switch (act) {
+        case 'esc': setMode(!translitOn); break;
+        case 'caps':
+        case 'shift': toggleShift(); srcEl.focus(); break;
+        case 'space': insertChar(' '); break;
+        case 'enter': insertChar('\n'); break;
+        case 'backspace': backspace(); break;
+        case 'delete': deleteForward(); break;
+        case 'home': moveCaret(0); break;
+        case 'end': moveCaret(srcEl.value.length); break;
+      }
     }
 
     function makeKey(entry) {
@@ -738,19 +812,25 @@
         el.title = entry.cyr + ' — набрать: ' + entry.lat;
         el.append(span('cap', entry.cap), span('bot', entry.cyr), span('mid', entry.lat));
         el.addEventListener('click', () => insertKey(entry));
-      } else if (entry.role === 'shift') {
+      } else if (entry.ch) {
         el = document.createElement('button');
         el.type = 'button';
-        el.className = 'key mod';
-        el.append(span('lbl', entry.lbl));
-        el.addEventListener('click', toggleShift);
-        shiftKeys.push(el);
-      } else if (entry.role === 'space') {
+        el.className = 'key punc';
+        el.title = entry.up ? entry.ch + ' / ' + entry.up : entry.ch;
+        el.append(span('bot', entry.ch));
+        if (entry.up) el.append(span('mid', entry.up));
+        el.addEventListener('click', () => insertPunc(entry));
+      } else if (entry.blank) {
+        el = document.createElement('div');
+        el.className = 'key dead blank';
+        el.setAttribute('aria-hidden', 'true');
+      } else if (entry.act && entry.act !== 'none') {
         el = document.createElement('button');
         el.type = 'button';
-        el.className = 'key mod';
+        el.className = 'key act';
         el.append(span('lbl', entry.lbl));
-        el.addEventListener('click', () => insertChar(' '));
+        el.addEventListener('click', () => runAction(entry.act));
+        if (entry.act === 'shift' || entry.act === 'caps') shiftKeys.push(el);
       } else {
         el = document.createElement('div');
         el.className = 'key dead';
@@ -764,8 +844,10 @@
 
     function buildTable() {
       for (const row of KEY_ROWS) {
+        const units = row.reduce((sum, e) => sum + (e.w || 1), 0);
         const rowEl = document.createElement('div');
         rowEl.className = 'krow';
+        rowEl.style.gridTemplateColumns = 'repeat(' + Math.round(units * 4) + ', 1fr)';
         for (const entry of row) rowEl.appendChild(makeKey(entry));
         kbdEl.appendChild(rowEl);
       }

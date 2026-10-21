@@ -391,13 +391,6 @@
       <button class="linkbtn" id="modeBtn" type="button"><span id="modeBtnLabel">Включить латиницу</span><kbd>Esc</kbd></button>
     </div>
 
-    <details class="ref" id="ref">
-      <summary>Клавиатура транслита</summary>
-      <div class="kbd-scroll">
-        <div class="kbd" id="kbd"></div>
-      </div>
-    </details>
-
     <div class="editor">
       <textarea id="src" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Начните печатать латиницей…"></textarea>
     </div>
@@ -407,6 +400,13 @@
       <button class="btn secondary" id="clearBtn" type="button">Очистить</button>
       <span class="count" id="count">0</span>
     </div>
+
+    <details class="ref" id="ref">
+      <summary>Экранная клавиатура</summary>
+      <div class="kbd-scroll">
+        <div class="kbd" id="kbd"></div>
+      </div>
+    </details>
   </main>
 
   <script>
@@ -905,7 +905,6 @@
     copyBtn.addEventListener('click', copyAll);
 
     buildTable();
-    if (window.innerWidth >= 900) document.getElementById('ref').open = true;
     updateCount();
   </script>
 </body>

@@ -117,8 +117,22 @@
     --halo: rgba(255, 255, 255, .06);
   }
 
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .5s ease;
+  }
+
+  body.latin-mode::after { opacity: .3; }
+
   @media (prefers-reduced-motion: reduce) {
-    body { transition: none; }
+    body,
+    body::after { transition: none; }
   }
 
   .topbar {

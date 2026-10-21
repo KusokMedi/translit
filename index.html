@@ -654,16 +654,16 @@
       F_ROW,
       [
         { cyr: 'Ё', cap: '`', lat: 'jo,yo,ö,`' },
-        { ch: '1' },
-        { ch: '2' },
-        { ch: '3' },
-        { ch: '4' },
-        { ch: '5' },
-        { ch: '6' },
-        { ch: '7' },
-        { ch: '8' },
-        { ch: '9' },
-        { ch: '0' },
+        { ch: '1', up: '!', shiftOnly: true },
+        { ch: '2', up: '@', shiftOnly: true },
+        { ch: '3', up: '#', upCyr: 'ъ', shiftOnly: true },
+        { ch: '4', up: '$', shiftOnly: true },
+        { ch: '5', up: '%', shiftOnly: true },
+        { ch: '6', up: '^', shiftOnly: true },
+        { ch: '7', up: '&', shiftOnly: true },
+        { ch: '8', up: '*', shiftOnly: true },
+        { ch: '9', up: '(', shiftOnly: true },
+        { ch: '0', up: ')', shiftOnly: true },
         { ch: '-', up: '_' },
         { ch: '=', up: '+' },
         { w: 2, lbl: '⌫', act: 'backspace' }
@@ -922,6 +922,7 @@
       modeText.textContent = on ? 'Я хочу писать по-русски' : 'Я хочу писать латиницей';
       modeBtnLabel.textContent = on ? 'Включить латиницу' : 'Включить кириллицу';
       srcEl.placeholder = on ? 'Начните печатать латиницей…' : 'Обычный ввод без транслита…';
+      syncMods();
       updateCount();
       srcEl.focus({ preventScroll: true });
     }
@@ -1003,7 +1004,10 @@
       if (modKeys.r) modKeys.r.classList.toggle('on', shiftR);
       const shifted = isUpper();
       kbdEl.classList.toggle('shifted', shifted);
-      for (const p of puncKeys) p.bot.textContent = shifted ? p.up : p.ch;
+      for (const p of puncKeys) {
+        const on = p.shiftOnly ? (shiftL || shiftR) : shifted;
+        p.bot.textContent = on ? (translitOn && p.upCyr ? p.upCyr : p.up) : p.ch;
+      }
     }
 
     function consumeShift() {
@@ -1025,9 +1029,10 @@
     }
 
     function insertPunc(entry) {
-      const upper = isUpper();
+      const upper = entry.shiftOnly ? (shiftL || shiftR) : isUpper();
       consumeShift();
-      insertChar(upper && entry.up ? entry.up : entry.ch);
+      const symbol = translitOn && entry.upCyr ? entry.upCyr : entry.up;
+      insertChar(upper && symbol ? symbol : entry.ch);
     }
 
     function backspace() {
@@ -1098,7 +1103,7 @@
         el.title = entry.up ? entry.ch + ' / ' + entry.up : entry.ch;
         const puncBot = span('bot', entry.ch);
         el.append(puncBot);
-        puncKeys.push({ bot: puncBot, ch: entry.ch, up: entry.up || entry.ch });
+        puncKeys.push({ bot: puncBot, ch: entry.ch, up: entry.up || entry.ch, upCyr: entry.upCyr, shiftOnly: !!entry.shiftOnly });
         el.addEventListener('click', () => insertPunc(entry));
       } else if (entry.blank) {
         el = document.createElement('div');

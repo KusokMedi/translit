@@ -227,6 +227,38 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  button.btn.ghost {
+    padding: 8px 13px;
+    font-size: 13px;
+    font-weight: 600;
+    background: transparent;
+    border-color: var(--border);
+    color: var(--muted);
+  }
+
+  button.btn.ghost:hover {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  button.btn.ghost:disabled {
+    opacity: .4;
+    cursor: default;
+  }
+
+  button.btn.ghost:disabled:hover {
+    color: var(--muted);
+    border-color: var(--border);
+    background: transparent;
+  }
+
   .ref {
     background: var(--panel);
     border: 1px solid var(--border);
@@ -340,16 +372,6 @@
     color: var(--text);
   }
 
-  .key.punc .mid {
-    font-size: 10px;
-    visibility: hidden;
-  }
-
-  .kbd.shifted .key.punc .mid {
-    visibility: visible;
-    color: var(--accent);
-  }
-
   .key .lbl {
     font-size: 9.5px;
     line-height: 1.1;
@@ -407,6 +429,13 @@
       <span class="count" id="count">0</span>
     </div>
 
+    <div class="tools">
+      <button class="btn ghost" id="toCyrBtn" type="button">В кириллицу</button>
+      <button class="btn ghost" id="toLatBtn" type="button">В латиницу</button>
+      <button class="btn ghost" id="googleBtn" type="button">Найти в Google</button>
+      <button class="btn ghost" id="youtubeBtn" type="button">Найти в YouTube</button>
+    </div>
+
     <details class="ref" id="ref">
       <summary>Экранная клавиатура</summary>
       <div class="kbd-scroll">
@@ -427,6 +456,14 @@
       ja: 'я', ya: 'я', q: 'я',
       "'": 'ь', mz: 'ь', mjz: 'ь',
       '#': 'ъ', '##': 'ъ', tvz: 'ъ'
+    };
+
+    const CYR2LAT = {
+      'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'jo',
+      'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'j', 'к': 'k', 'л': 'l', 'м': 'm',
+      'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u',
+      'ф': 'f', 'х': 'h', 'ц': 'c', 'ч': 'ch', 'ш': 'sh', 'щ': 'shh', 'ъ': '#',
+      'ы': 'y', 'ь': "'", 'э': 'je', 'ю': 'ju', 'я': 'ja'
     };
 
     const F_ROW = [{ lbl: 'esc', act: 'esc' }];
@@ -527,8 +564,14 @@
     const modeBtn = document.getElementById('modeBtn');
     const modeBtnLabel = document.getElementById('modeBtnLabel');
     const modeText = document.getElementById('modeText');
+    const toCyrBtn = document.getElementById('toCyrBtn');
+    const toLatBtn = document.getElementById('toLatBtn');
+    const googleBtn = document.getElementById('googleBtn');
+    const youtubeBtn = document.getElementById('youtubeBtn');
+    const toolBtns = [toCyrBtn, toLatBtn, googleBtn, youtubeBtn];
     const kbdEl = document.getElementById('kbd');
     const modKeys = { caps: null, l: null, r: null };
+    const puncKeys = [];
 
     let translitOn = true;
     let capsOn = false;
@@ -574,6 +617,24 @@
       return out;
     }
 
+    function toLatin(text) {
+      let out = '';
+      let inWord = false;
+      for (const ch of text) {
+        const low = ch.toLowerCase();
+        const lat = CYR2LAT[low];
+        if (!lat) {
+          out += ch;
+          inWord = /\p{L}/u.test(ch);
+          continue;
+        }
+        if (ch === low) out += lat;
+        else out += inWord ? lat.toUpperCase() : lat.charAt(0).toUpperCase() + lat.slice(1);
+        inWord = true;
+      }
+      return out;
+    }
+
     function resolveLive(buffer) {
       let committed = '';
       let i = 0;
@@ -603,6 +664,8 @@
 
     function updateCount() {
       countEl.textContent = Array.from(srcEl.value).length;
+      const empty = !srcEl.value.trim();
+      for (const btn of toolBtns) btn.disabled = empty;
     }
 
     function replaceSelection(text) {
@@ -705,6 +768,27 @@
       srcEl.focus({ preventScroll: true });
     }
 
+    function replaceAll(text) {
+      resetTail();
+      lastPlus = false;
+      srcEl.value = text;
+      srcEl.setSelectionRange(text.length, text.length);
+      updateCount();
+      srcEl.focus({ preventScroll: true });
+    }
+
+    function searchQuery() {
+      const start = srcEl.selectionStart;
+      const end = srcEl.selectionEnd;
+      return (start !== end ? srcEl.value.slice(start, end) : srcEl.value).trim();
+    }
+
+    function openSearch(base) {
+      const query = searchQuery();
+      if (!query) return;
+      window.open(base + encodeURIComponent(query), '_blank', 'noopener');
+    }
+
     function copyAll() {
       const text = srcEl.value;
       const done = () => {
@@ -753,7 +837,9 @@
       if (modKeys.caps) modKeys.caps.classList.toggle('on', capsOn);
       if (modKeys.l) modKeys.l.classList.toggle('on', shiftL);
       if (modKeys.r) modKeys.r.classList.toggle('on', shiftR);
-      kbdEl.classList.toggle('shifted', capsOn || shiftL || shiftR);
+      const shifted = isUpper();
+      kbdEl.classList.toggle('shifted', shifted);
+      for (const p of puncKeys) p.bot.textContent = shifted ? p.up : p.ch;
     }
 
     function consumeShift() {
@@ -846,8 +932,9 @@
         el.type = 'button';
         el.className = 'key punc';
         el.title = entry.up ? entry.ch + ' / ' + entry.up : entry.ch;
-        el.append(span('bot', entry.ch));
-        if (entry.up) el.append(span('mid', entry.up));
+        const puncBot = span('bot', entry.ch);
+        el.append(puncBot);
+        puncKeys.push({ bot: puncBot, ch: entry.ch, up: entry.up || entry.ch });
         el.addEventListener('click', () => insertPunc(entry));
       } else if (entry.blank) {
         el = document.createElement('div');
@@ -911,6 +998,10 @@
     modeBtn.addEventListener('click', () => setMode(!translitOn));
     clearBtn.addEventListener('click', clearAll);
     copyBtn.addEventListener('click', copyAll);
+    toCyrBtn.addEventListener('click', () => replaceAll(toCyrillic(srcEl.value)));
+    toLatBtn.addEventListener('click', () => replaceAll(toLatin(srcEl.value)));
+    googleBtn.addEventListener('click', () => openSearch('https://www.google.com/search?q='));
+    youtubeBtn.addEventListener('click', () => openSearch('https://www.youtube.com/results?search_query='));
 
     buildTable();
     updateCount();

@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Транслит — печатайте латиницей, получайте кириллицу</title>
-<meta name="description" content="Онлайн-транслитератор: печатайте латиницей — текст сразу становится кириллицей. Esc переключает режим ввода. Схема как на translit.net.">
+<title>Транслит</title>
+<meta name="description" content="Онлайн-транслитератор: печатайте латиницей, текст сразу становится кириллицей. Esc переключает режим ввода. Схема как на translit.net.">
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-title" content="Транслит">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -595,7 +595,7 @@
 
     <div class="editor">
       <textarea id="src" spellcheck="false" autocomplete="off" autocapitalize="off" placeholder="Начните печатать латиницей…"></textarea>
-      <div class="grip" id="grip" title="Потяните, чтобы изменить высоту (двойной клик — сбросить)"></div>
+      <div class="grip" id="grip" title="Потяните, чтобы изменить высоту (двойной клик: сбросить)"></div>
     </div>
 
     <div class="controls">
@@ -921,7 +921,7 @@
       document.body.classList.toggle('latin-mode', !on);
       modeText.textContent = on ? 'Я хочу писать по-русски' : 'Я хочу писать латиницей';
       modeBtnLabel.textContent = on ? 'Включить латиницу' : 'Включить кириллицу';
-      srcEl.placeholder = on ? 'Начните печатать латиницей…' : 'Обычный ввод — без транслита…';
+      srcEl.placeholder = on ? 'Начните печатать латиницей…' : 'Обычный ввод без транслита…';
       updateCount();
       srcEl.focus({ preventScroll: true });
     }
@@ -1088,7 +1088,7 @@
         el = document.createElement('button');
         el.type = 'button';
         el.className = 'key letter';
-        el.title = entry.cyr + ' — набрать: ' + entry.lat;
+        el.title = entry.cyr + ' - набрать: ' + entry.lat;
         el.append(span('cap', entry.cap), span('bot', entry.cyr), span('mid', entry.lat));
         el.addEventListener('click', () => insertKey(entry));
       } else if (entry.ch) {

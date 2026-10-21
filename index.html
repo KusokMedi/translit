@@ -482,7 +482,7 @@
         { w: 2.25, lbl: 'enter', act: 'enter' }
       ],
       [
-        { w: 1.5, lbl: 'shift', act: 'shift' },
+        { w: 1.5, lbl: 'shift', act: 'shift', side: 'l' },
         { cyr: 'Я', cap: 'z', lat: 'ja,ya,q' },
         { cyr: 'Ч', cap: 'x', lat: 'ch' },
         { cyr: 'С', cap: 'c', lat: 's' },
@@ -495,7 +495,7 @@
         { ch: ',', up: '<' },
         { ch: '.', up: '>' },
         { ch: '/', up: '?' },
-        { w: 1.5, lbl: 'shift', act: 'shift' }
+        { w: 1.5, lbl: 'shift', act: 'shift', side: 'r' }
       ],
       [
         { w: 1.25, blank: true },
@@ -522,10 +522,12 @@
     const modeBtnLabel = document.getElementById('modeBtnLabel');
     const modeText = document.getElementById('modeText');
     const kbdEl = document.getElementById('kbd');
-    const shiftKeys = [];
+    const modKeys = { caps: null, l: null, r: null };
 
     let translitOn = true;
-    let shiftOn = false;
+    let capsOn = false;
+    let shiftL = false;
+    let shiftR = false;
     let lastPlus = false;
     let tailSource = '';
     let tailRendered = '';
@@ -737,22 +739,38 @@
       return el;
     }
 
+    function isUpper() {
+      return capsOn || shiftL || shiftR;
+    }
+
+    function syncMods() {
+      if (modKeys.caps) modKeys.caps.classList.toggle('on', capsOn);
+      if (modKeys.l) modKeys.l.classList.toggle('on', shiftL);
+      if (modKeys.r) modKeys.r.classList.toggle('on', shiftR);
+    }
+
+    function consumeShift() {
+      if (!shiftL && !shiftR) return;
+      shiftL = false;
+      shiftR = false;
+      syncMods();
+    }
+
     function insertKey(entry) {
+      const upper = isUpper();
+      consumeShift();
       if (translitOn) {
-        insertChar(shiftOn ? entry.cyr : entry.cyr.toLowerCase());
+        insertChar(upper ? entry.cyr : entry.cyr.toLowerCase());
         return;
       }
       const primary = entry.lat.split(',')[0].trim();
-      insertChar(shiftOn ? primary.toUpperCase() : primary);
+      insertChar(upper ? primary.toUpperCase() : primary);
     }
 
     function insertPunc(entry) {
-      insertChar(shiftOn && entry.up ? entry.up : entry.ch);
-    }
-
-    function toggleShift() {
-      shiftOn = !shiftOn;
-      for (const k of shiftKeys) k.classList.toggle('on', shiftOn);
+      const upper = isUpper();
+      consumeShift();
+      insertChar(upper && entry.up ? entry.up : entry.ch);
     }
 
     function backspace() {
@@ -788,11 +806,15 @@
       srcEl.setSelectionRange(pos, pos);
     }
 
-    function runAction(act) {
+    function runAction(act, side) {
       switch (act) {
         case 'esc': setMode(!translitOn); break;
-        case 'caps':
-        case 'shift': toggleShift(); srcEl.focus(); break;
+        case 'caps': capsOn = !capsOn; syncMods(); srcEl.focus(); break;
+        case 'shift':
+          if (side === 'l') shiftL = !shiftL; else shiftR = !shiftR;
+          syncMods();
+          srcEl.focus();
+          break;
         case 'space': insertChar(' '); break;
         case 'enter': insertChar('\n'); break;
         case 'backspace': backspace(); break;
@@ -829,8 +851,9 @@
         el.type = 'button';
         el.className = 'key act';
         el.append(span('lbl', entry.lbl));
-        el.addEventListener('click', () => runAction(entry.act));
-        if (entry.act === 'shift' || entry.act === 'caps') shiftKeys.push(el);
+        el.addEventListener('click', () => runAction(entry.act, entry.side));
+        if (entry.act === 'caps') modKeys.caps = el;
+        if (entry.act === 'shift') modKeys[entry.side] = el;
       } else {
         el = document.createElement('div');
         el.className = 'key dead';

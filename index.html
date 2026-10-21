@@ -11,28 +11,52 @@
 <meta name="format-detection" content="telephone=no">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='b' x1='0' y1='0' x2='.4' y2='1'><stop offset='0' stop-color='%232a2a2a'/><stop offset='1' stop-color='%23040404'/></linearGradient><radialGradient id='h' cx='.28' cy='.12' r='.95'><stop offset='0' stop-color='%23ffffff' stop-opacity='.2'/><stop offset='.55' stop-color='%23ffffff' stop-opacity='.03'/><stop offset='1' stop-color='%23ffffff' stop-opacity='0'/></radialGradient><linearGradient id='k' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='%23ffffff'/><stop offset='1' stop-color='%23c9c9c9'/></linearGradient></defs><rect width='100' height='100' rx='24' fill='url(%23b)'/><rect width='100' height='100' rx='24' fill='url(%23h)'/><rect x='1.7' y='1.7' width='96.6' height='96.6' rx='22.3' fill='none' stroke='%23ffffff' stroke-opacity='.17' stroke-width='3'/><rect x='15' y='31.5' width='70' height='42' rx='9' fill='%23000000' opacity='.5'/><rect x='15' y='29' width='70' height='42' rx='9' fill='url(%23k)'/><g fill='%230b0b0b'><rect x='22.5' y='36.4' width='9.4' height='7.4' rx='2.2'/><rect x='33.9' y='36.4' width='9.4' height='7.4' rx='2.2'/><rect x='45.3' y='36.4' width='9.4' height='7.4' rx='2.2'/><rect x='56.7' y='36.4' width='9.4' height='7.4' rx='2.2'/><rect x='68.1' y='36.4' width='9.4' height='7.4' rx='2.2'/><rect x='22.5' y='46.6' width='9.4' height='7.4' rx='2.2'/><rect x='33.9' y='46.6' width='9.4' height='7.4' rx='2.2'/><rect x='45.3' y='46.6' width='9.4' height='7.4' rx='2.2'/><rect x='56.7' y='46.6' width='9.4' height='7.4' rx='2.2'/><rect x='68.1' y='46.6' width='9.4' height='7.4' rx='2.2'/><rect x='33.5' y='56.8' width='33' height='7.2' rx='3.4'/></g></svg>">
 <style>
+  @property --text {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: #ededed;
+  }
+
+  @property --accent {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: #ffffff;
+  }
+
+  @property --accent-soft {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: rgba(255, 255, 255, .09);
+  }
+
+  @property --btn-top {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: #ffffff;
+  }
+
+  @property --btn-bottom {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: #c9c9c9;
+  }
+
+  @property --glow {
+    syntax: "<color>";
+    inherits: true;
+    initial-value: rgba(255, 255, 255, .35);
+  }
+
   :root {
     color-scheme: dark;
     --bg: #000000;
-    --text: #ededed;
     --muted: #8b8b8b;
     --line: rgba(255, 255, 255, .08);
     --line-strong: rgba(255, 255, 255, .16);
     --surface: rgba(255, 255, 255, .04);
     --surface-hover: rgba(255, 255, 255, .08);
-    --accent: #ffffff;
-    --accent-soft: rgba(255, 255, 255, .09);
-    --btn-top: #ffffff;
-    --btn-bottom: #c9c9c9;
     --radius: 14px;
     --radius-sm: 10px;
-  }
-
-  body.latin-mode {
-    --accent: #a3a3a3;
-    --accent-soft: rgba(255, 255, 255, .07);
-    --btn-top: #ababab;
-    --btn-bottom: #7d7d7d;
   }
 
   * { box-sizing: border-box; }
@@ -58,9 +82,34 @@
     background-repeat: no-repeat;
     color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    transition: color .2s ease;
+    --text: #ededed;
+    --accent: #ffffff;
+    --accent-soft: rgba(255, 255, 255, .09);
+    --btn-top: #ffffff;
+    --btn-bottom: #c9c9c9;
+    --glow: rgba(255, 255, 255, .35);
+    transition:
+      --text .5s ease,
+      --accent .5s ease,
+      --accent-soft .5s ease,
+      --btn-top .5s ease,
+      --btn-bottom .5s ease,
+      --glow .5s ease;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, .18) transparent;
+  }
+
+  body.latin-mode {
+    --text: #bdbdbd;
+    --accent: #9a9a9a;
+    --accent-soft: rgba(255, 255, 255, .06);
+    --btn-top: #a8a8a8;
+    --btn-bottom: #787878;
+    --glow: rgba(255, 255, 255, .1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    body { transition: none; }
   }
 
   .topbar {
@@ -91,7 +140,7 @@
     background: linear-gradient(180deg, var(--btn-top), var(--btn-bottom));
     color: #000;
     font-size: 16px;
-    box-shadow: 0 4px 14px rgba(255, 255, 255, .12);
+    box-shadow: 0 4px 14px var(--accent-soft);
   }
 
   .brand .badge svg {
@@ -232,12 +281,10 @@
   button.btn.primary {
     background: linear-gradient(180deg, var(--btn-top), var(--btn-bottom));
     color: #000;
-    box-shadow: 0 6px 20px -6px rgba(255, 255, 255, .35);
+    box-shadow: 0 6px 20px -6px var(--glow);
   }
 
-  button.btn.primary:hover {
-    background: linear-gradient(180deg, var(--btn-top), #e4e4e4);
-  }
+  button.btn.primary:hover { filter: brightness(1.08); }
 
   button.btn.primary.done {
     background: linear-gradient(180deg, var(--btn-bottom), var(--btn-top));

@@ -910,14 +910,6 @@
     function setMode(on) {
       resetTail();
       translitOn = on;
-      if (on) {
-        const before = srcEl.value;
-        const after = toCyrillic(before);
-        if (after !== before) {
-          srcEl.value = after;
-          srcEl.setSelectionRange(after.length, after.length);
-        }
-      }
       document.body.classList.toggle('latin-mode', !on);
       modeText.textContent = on ? 'Я хочу писать по-русски' : 'Я хочу писать латиницей';
       modeBtnLabel.textContent = on ? 'Включить латиницу' : 'Включить кириллицу';
@@ -938,6 +930,24 @@
       resetTail();
       srcEl.value = text;
       srcEl.setSelectionRange(text.length, text.length);
+      updateCount();
+      srcEl.focus({ preventScroll: true });
+    }
+
+    function convertSelection(convertFn) {
+      resetTail();
+      const start = srcEl.selectionStart;
+      const end = srcEl.selectionEnd;
+      if (start !== end) {
+        const converted = convertFn(srcEl.value.slice(start, end));
+        srcEl.value = srcEl.value.slice(0, start) + converted + srcEl.value.slice(end);
+        const caret = start + converted.length;
+        srcEl.setSelectionRange(caret, caret);
+      } else {
+        const text = convertFn(srcEl.value);
+        srcEl.value = text;
+        srcEl.setSelectionRange(text.length, text.length);
+      }
       updateCount();
       srcEl.focus({ preventScroll: true });
     }
@@ -1167,8 +1177,8 @@
     modeBtn.addEventListener('click', () => setMode(!translitOn));
     clearBtn.addEventListener('click', clearAll);
     copyBtn.addEventListener('click', copyAll);
-    toCyrBtn.addEventListener('click', () => replaceAll(toCyrillic(srcEl.value)));
-    toLatBtn.addEventListener('click', () => replaceAll(toLatin(srcEl.value)));
+    toCyrBtn.addEventListener('click', () => convertSelection(toCyrillic));
+    toLatBtn.addEventListener('click', () => convertSelection(toLatin));
     googleBtn.addEventListener('click', () => openSearch('https://www.google.com/search?q='));
     youtubeBtn.addEventListener('click', () => openSearch('https://www.youtube.com/results?search_query='));
 

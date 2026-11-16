@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contact the maintainer
+    url: https://kusokmedi.lat/
+    about: Questions and support requests
+  - name: Telegram
+    url: https://t.me/kusokmedi52
+    about: Direct contact on Telegram
+  - name: Live demo
+    url: https://kusokmedi.github.io/translit
+    about: Try the app online

@@ -1,5 +1,7 @@
 # Транслит
 
+[![License](https://img.shields.io/github/license/KusokMedi/translit)](LICENSE) [![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-pink)](https://github.com/sponsors/KusokMedi) [![Patreon](https://img.shields.io/badge/Patreon-kusokmedi-orange)](https://www.patreon.com/kusokmedi)
+
 Онлайн-транслитератор в одном окне: печатаете латиницей — текст сразу превращается в кириллицу. Замена [translit.net](https://translit.net) без рекламы, аккаунтов и зависимостей.
 
 **Демо:** https://kusokmedi.github.io/translit
@@ -64,3 +66,10 @@ HTML5, CSS3, vanilla JavaScript. Без сборки и npm-зависимост
 ## Лицензия
 
 MIT
+
+## Support
+
+If you find this project useful, consider supporting:
+
+- GitHub Sponsors: https://github.com/sponsors/KusokMedi
+- Patreon: https://www.patreon.com/kusokmedi
